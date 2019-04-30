@@ -8,18 +8,21 @@ exports.getAddProduct = (req, res, next) => {
 };
 
 exports.postAddProduct = (req, res, next) => {
-    const product= new Products(req.body.title);
+    const product = new Products(req.body.title);
     product.save();
+    console.log(product.title)
     console.log(req.body);
     res.redirect(302, '/');
 };
 
 exports.getProducts = (req, res, next) => {
     //res.send('<h1>Welcome to the shop</h1>');
-    console.log(Products.fetchAllProducts());
-    res.render('shop', {
-        prod: Products.fetchAllProducts(),
-        title: 'My Shop',
-        path: '/',
-    });
+    Products.fetchAllProducts((products) => {
+        res.render('shop', {
+            prod: products,
+            title: 'My Shop',
+            path: '/',
+        });
+    })
+
 };
