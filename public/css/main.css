@@ -16,7 +16,7 @@ main {
 }
 
 form {
-  display: inline;
+  display: block;
 }
 
 .main-header {
