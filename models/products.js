@@ -1,11 +1,25 @@
 const path = require('path');
 const fs = require('fs');
 const rootDir = require('../util/path');
-
+const crypto = require('crypto');
+const getProductFromFile = cb => {
+    const filePath = path.join(rootDir, 'data', 'products.json');
+    fs.readFile(filePath, (err, fileContent) => {
+        if (!err && fileContent.length > 0) {
+            cb(JSON.parse(fileContent));
+        } else {
+            cb([]);
+        }
+    });
+}
 
 module.exports = class Products {
-    constructor(t) {
-        this.title = t;
+    constructor(title, imageURL, price, descraption) {
+        this.id = crypto.randomBytes(16).toString('hex');
+        this.title = title;
+        this.imageURL = imageURL;
+        this.descraption = descraption;
+        this.price = price;
     }
     save() {
         let fileCreated = new Promise((resolve, reject) => {
@@ -21,14 +35,9 @@ module.exports = class Products {
             }
         });
         fileCreated.then((result) => {
-            const filePath = path.join(rootDir, 'data', 'products.json');
-            fs.readFile(filePath, (err, fileContent) => {
-                let products = [];
-                if (!err && fileContent.length > 0) {
-                    products = JSON.parse(fileContent);
-                }
-                products.push(this);
-                fs.writeFile(filePath, JSON.stringify(products), (err) => {
+            getProductFromFile((productsArray) => {
+                productsArray.push(this);
+                fs.writeFile(filePath, JSON.stringify(productsArray), (err) => {
                     if (err) {
                         console.log(err);
                     }
@@ -39,13 +48,12 @@ module.exports = class Products {
         });
     }
     static fetchAllProducts(cb) {
-        const filePath = path.join(rootDir, 'data', 'products.json');
-        fs.readFile(filePath, (err, fileContent) => {
-            if (!err && fileContent.length > 0) {
-                cb(JSON.parse(fileContent));
-            } else {
-                cb([]);
-            }
+        getProductFromFile(cb);
+    }
+    static findbyId(URLId,cb) {
+        getProductFromFile((productsArray)=>{
+            let Product=productsArray.find(prodtctObject => prodtctObject.id=URLId);
+            cb(Product);
         });
     }
 }
