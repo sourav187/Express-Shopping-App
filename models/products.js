@@ -37,6 +37,7 @@ module.exports = class Products {
         fileCreated.then((result) => {
             getProductFromFile((productsArray) => {
                 productsArray.push(this);
+                const filePath = path.join(rootDir, 'data', 'products.json');
                 fs.writeFile(filePath, JSON.stringify(productsArray), (err) => {
                     if (err) {
                         console.log(err);
@@ -52,7 +53,10 @@ module.exports = class Products {
     }
     static findbyId(URLId,cb) {
         getProductFromFile((productsArray)=>{
-            let Product=productsArray.find(prodtctObject => prodtctObject.id=URLId);
+            console.log(productsArray);
+            console.log(URLId);
+            let Product=productsArray.find(prodtctObject => prodtctObject.id===URLId);
+            console.log(Product)
             cb(Product);
         });
     }
