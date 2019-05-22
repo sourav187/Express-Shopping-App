@@ -53,10 +53,7 @@ module.exports = class Products {
     }
     static findbyId(URLId,cb) {
         getProductFromFile((productsArray)=>{
-            console.log(productsArray);
-            console.log(URLId);
             let Product=productsArray.find(prodtctObject => prodtctObject.id===URLId);
-            console.log(Product)
             cb(Product);
         });
     }
