@@ -1,7 +1,9 @@
 const path = require('path');
 const fs = require('fs');
 const rootDir = require('../util/path');
+const Cart = require('../models/cart');
 const crypto = require('crypto');
+
 const getProductFromFile = cb => {
     const filePath = path.join(rootDir, 'data', 'products.json');
     fs.readFile(filePath, (err, fileContent) => {
@@ -14,8 +16,8 @@ const getProductFromFile = cb => {
 }
 
 module.exports = class Products {
-    constructor(title, imageURL, price, descraption) {
-        this.id = crypto.randomBytes(16).toString('hex');
+    constructor(id, title, imageURL, price, descraption) {
+        this.id = id;
         this.title = title;
         this.imageURL = imageURL;
         this.descraption = descraption;
@@ -35,25 +37,54 @@ module.exports = class Products {
             }
         });
         fileCreated.then((result) => {
-            getProductFromFile((productsArray) => {
-                productsArray.push(this);
-                const filePath = path.join(rootDir, 'data', 'products.json');
-                fs.writeFile(filePath, JSON.stringify(productsArray), (err) => {
-                    if (err) {
-                        console.log(err);
-                    }
+            if (this.id) {
+                const exestingProductArray = getProductFromFile((productsArray) => {
+                    const updatedProductIndex = productsArray.findIndex(prod => prod.id = this.id);
+                    productsArray[updatedProductIndex] = this;
+                    const filePath = path.join(rootDir, 'data', 'products.json');
+                    fs.writeFile(filePath, JSON.stringify(productsArray), (err) => {
+                        if (err) {
+                            console.log(err);
+                        }
+                    });
                 });
-            });
+            } else {
+                this.id = crypto.randomBytes(16).toString('hex');
+                getProductFromFile((productsArray) => {
+                    productsArray.push(this);
+                    const filePath = path.join(rootDir, 'data', 'products.json');
+                    fs.writeFile(filePath, JSON.stringify(productsArray), (err) => {
+                        if (err) {
+                            console.log(err);
+                        }
+                    });
+                });
+            }
         }).catch((err) => {
             console.log(err);
         });
     }
+
+    static deleteById(id) {
+        getProductFromFile((productsArray) => {
+            const product = productsArray.find(prodtctObject => prodtctObject.id === id);
+            let UpdatedProductArray = productsArray.filter(prodtctObject => prodtctObject.id !== id);
+            const filePath = path.join(rootDir, 'data', 'products.json');
+            fs.writeFile(filePath, JSON.stringify(UpdatedProductArray), (err) => {
+                if (!err) {
+                    Cart.deleteProduct(id, product.price);
+                }
+            });
+        });
+    }
+
     static fetchAllProducts(cb) {
         getProductFromFile(cb);
     }
-    static findbyId(URLId,cb) {
-        getProductFromFile((productsArray)=>{
-            let Product=productsArray.find(prodtctObject => prodtctObject.id===URLId);
+
+    static findbyId(id, cb) {
+        getProductFromFile((productsArray) => {
+            let Product = productsArray.find(prodtctObject => prodtctObject.id === id);
             cb(Product);
         });
     }
