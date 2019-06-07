@@ -5,20 +5,20 @@
 <body>
     <%- include('../includes/navigation.ejs') %>
     <main>
+        <% grandTotal=0 %>
         <% if( cart.length > 0) {%>
         <ul>
             <% cart.forEach( p => { %>
             <li>
-                <%= p.productData.title %>(Quantity:<%= p.qty %> Price:<%=p.productData.price%>$) Total:<%= p.qty*p.productData.price %>
+                <%= p.title %>(Quantity:<%= p.quantity %> Price:<%=p.price%>$) Total:<%= p.quantity*p.price %>
                 <form style="display:block;margin:5px;" action="/delete-cart-item" method="post">
                     <button class="btn" type="submit">Delete</button>
-                    <input type="hidden" name="productId" value="<%= p.productData.id %>">
-                    <input type="hidden" name="productPrice" value="<%= p.productData.price %>">
+                    <input type="hidden" name="productId" value="<%= p.id %>">
                 </form>
             </li>
-            <% }) %>
+            <% grandTotal=grandTotal+p.quantity*p.price}) %>
         </ul>
-    <h3>Total Cart Price: <span style="color: red"><%= totalCartValue %>$</span></h3>
+    <h3>Total Cart Price: <span style="color: red"><%= grandTotal %>$</span></h3>
         <% } else { %>
         <h1>No Product found in the cart</h1>
         <%}%>
