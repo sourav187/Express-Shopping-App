@@ -13,7 +13,7 @@
             </div>
             <div class="form-control">
                 <label for="imageUrl">Product Image URL:</label>
-                <input type="url" name="imageUrl" id="imageUrl" value="<%= editMode ? product.imageURL : ''  %>">
+                <input type="url" name="imageUrl" id="imageUrl" value="<%= editMode ? product.imageUrl : ''  %>">
             </div>
             <div class="form-control">
                 <label for="productPrice">Product Price:</label>
@@ -21,7 +21,7 @@
             </div>
             <div class="form-control">
                 <label for="descraption">Product Descraption:</label>
-                <textarea name="descraption" id="descraption" ><%= editMode ? product.descraption : ''  %></textarea> 
+                <textarea name="descraption" id="descraption" ><%= editMode ? product.description : ''  %></textarea> 
             </div>
             <input type="hidden" name ="id" id="Id" value="<%= editMode ? product.id : ''  %>" >
             <button style="display: block;margin: auto;" class="btn" type="submit"><%= editMode ? 'Edit Product' : 'Add Product' %></button>

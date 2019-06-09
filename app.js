@@ -1,3 +1,4 @@
+const dotenv = require('dotenv').config();
 const express = require('express');
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
@@ -5,7 +6,8 @@ const rootDir = require('./util/path');
 const path = require('path');
 const bodyParser = require('body-parser');
 const ejs = require('ejs');
-const errorController=require('./controllers/error')
+const errorController=require('./controllers/error');
+const config=require('./util/config');
 
 //create express app
 const app = express();
@@ -27,4 +29,6 @@ app.use(shopRoutes);
 
 //Page note found rout
 app.use('/', errorController.pageNotFound);
-app.listen(3000,);
+app.listen(config.app.port,()=>{
+    console.log(`Listening at port ${config.app.port}`);
+});

@@ -1,19 +1,4 @@
-const path = require('path');
-const fs = require('fs');
-const rootDir = require('../util/path');
-const Cart = require('../models/cart');
-const crypto = require('crypto');
-
-const getProductFromFile = cb => {
-    const filePath = path.join(rootDir, 'data', 'products.json');
-    fs.readFile(filePath, (err, fileContent) => {
-        if (!err && fileContent.length > 0) {
-            cb(JSON.parse(fileContent));
-        } else {
-            cb([]);
-        }
-    });
-}
+const db=require('../util/database');
 
 module.exports = class Products {
     constructor(id, title, imageURL, price, descraption) {
@@ -24,68 +9,19 @@ module.exports = class Products {
         this.price = price;
     }
     save() {
-        let fileCreated = new Promise((resolve, reject) => {
-            if (!fs.existsSync(path.join(rootDir, 'data'))) {
-                fs.mkdir(path.join(rootDir, 'data'), (err) => {
-                    console.log(err);
-                    reject('Unable to create Dir');
-                });
-                fs.closeSync(fs.openSync(path.join(rootDir, 'data', 'products.json'), 'w'));
-                resolve();
-            } else {
-                resolve();
-            }
-        });
-        fileCreated.then((result) => {
-            if (this.id) {
-                const exestingProductArray = getProductFromFile((productsArray) => {
-                    const updatedProductIndex = productsArray.findIndex(prod => prod.id = this.id);
-                    productsArray[updatedProductIndex] = this;
-                    const filePath = path.join(rootDir, 'data', 'products.json');
-                    fs.writeFile(filePath, JSON.stringify(productsArray), (err) => {
-                        if (err) {
-                            console.log(err);
-                        }
-                    });
-                });
-            } else {
-                this.id = crypto.randomBytes(16).toString('hex');
-                getProductFromFile((productsArray) => {
-                    productsArray.push(this);
-                    const filePath = path.join(rootDir, 'data', 'products.json');
-                    fs.writeFile(filePath, JSON.stringify(productsArray), (err) => {
-                        if (err) {
-                            console.log(err);
-                        }
-                    });
-                });
-            }
-        }).catch((err) => {
-            console.log(err);
-        });
+        if (this.id) {
+            return db.execute('UPDATE products SET id=?,title=?,price=?,description=?,imageUrl=? WHERE id=?',[this.id,this.title,this.price,this.descraption,this.imageURL,this.id])
+        } else {
+            return db.execute('INSERT INTO `products`(`title`, `price`, `description`, `imageUrl`) VALUES (?,?,?,?)',[this.title,this.price,this.descraption,this.imageURL]);
+        }
     }
-
     static deleteById(id) {
-        getProductFromFile((productsArray) => {
-            const product = productsArray.find(prodtctObject => prodtctObject.id === id);
-            let UpdatedProductArray = productsArray.filter(prodtctObject => prodtctObject.id !== id);
-            const filePath = path.join(rootDir, 'data', 'products.json');
-            fs.writeFile(filePath, JSON.stringify(UpdatedProductArray), (err) => {
-                if (!err) {
-                    Cart.deleteProduct(id, product.price);
-                }
-            });
-        });
+        return db.execute('DELETE FROM products WHERE id=?',[id]);
     }
-
-    static fetchAllProducts(cb) {
-        getProductFromFile(cb);
+    static fetchAllProducts() {
+       return db.execute('SELECT * FROM products');
     }
-
-    static findbyId(id, cb) {
-        getProductFromFile((productsArray) => {
-            let Product = productsArray.find(prodtctObject => prodtctObject.id === id);
-            cb(Product);
-        });
+    static findbyId(id) {
+        return db.execute('SELECT * FROM products WHERE id=?',[id]);
     }
 }
